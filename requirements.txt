@@ -1,0 +1,11 @@
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+pyarrow>=12.0.0
+reportlab>=4.0.0
+scipy>=1.10.0
+gdown>=4.7.0
+tqdm>=4.65.0

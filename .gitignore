@@ -1,0 +1,22 @@
+# Virtual Environments
+qode2/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# IDEs / OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Data Files (Too large for GitHub)
+data/raw/
+data/processed/
+*.parquet
+*.csv
+*.gz
+*.zip
+
+# Note: We purposely do NOT ignore the `output/` folder so that you can upload 
+# your generated PDF, Excel sheets, and plots to GitHub for reviewers to see.
