@@ -8,14 +8,12 @@
 
 ## Overview
 
-Complete backtest system for 5 intraday Nifty options trading strategies using 1-minute OHLCV data from October 2024 to March 2026.
+Complete backtest system for 3 intraday Nifty options trading strategies using 1-minute OHLCV data from October 2024 to March 2026.
 
 ### Strategies:
 1. **Mean Reversion** — Short ATM straddle with combined premium SL
 2. **Directional** — Momentum breakout buying OTM options
 3. **Semi-Directional** — Ratio credit spread based on gap + momentum bias
-4. **Volatility Breakout** — Long straddle on opening range breakout
-5. **Iron Fly** — Defined-risk mean reversion with OTM wings
 
 ---
 
@@ -34,7 +32,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. Data Setup
-Place the NIFTY options data from Google Drive into `data/raw/`. The data should be organized in weekly expiry date folders:
+Download the required NIFTY options data (~740 MB zip) from the [Google Drive Link](https://drive.google.com/drive/u/0/folders/1mBWKNuQCQM3EwbncAJ6lTwQFf95Yfauw) and extract it into `data/raw/`. The data should be organized in weekly expiry date folders:
 ```
 data/raw/
 ├── 2024-10-03/
@@ -74,9 +72,7 @@ PYTHONPATH=. python main.py
 │   ├── base_strategy.py       # Abstract base class
 │   ├── mean_reversion.py      # Strategy 1
 │   ├── directional.py         # Strategy 2
-│   ├── semi_directional.py    # Strategy 3
-│   ├── volatility_breakout.py # Strategy 4
-│   └── iron_fly.py            # Strategy 5
+│   └── semi_directional.py    # Strategy 3
 ├── engine/
 │   ├── backtester.py          # Backtest execution engine
 │   ├── metrics.py             # 16+ performance metrics
@@ -92,7 +88,7 @@ PYTHONPATH=. python main.py
 
 ## Key Parameters
 
-- **Capital:** Rs. 1 Crore (Rs. 20 Lakhs per strategy)
+- **Capital:** Rs. 1 Crore (Rs. 33.3 Lakhs per strategy)
 - **Lot Size:** 25
 - **In-Sample:** Oct 2024 — Oct 2025
 - **Out-of-Sample:** Nov 2025 — Mar 2026
