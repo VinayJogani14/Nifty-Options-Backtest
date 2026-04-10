@@ -15,18 +15,20 @@ BASE_NAV = 100
 NUM_STRATEGIES = 3
 CAPITAL_PER_STRATEGY = STARTING_CAPITAL / NUM_STRATEGIES  # Rs. 33.3 Lakhs each
 
+MAX_LOTS = 20                   # 20 lots = 500 qty (Requires ~Rs. 30L margin, safely deploying the 33L cap)
+
 # === TRADING HOURS ===
 MARKET_OPEN = "09:15"
 MARKET_CLOSE = "15:30"
 
 # === TRANSACTION COSTS (per lot, per side) ===
-BROKERAGE_PER_ORDER = 0
-STT_SELL_RATE = 0
-EXCHANGE_TXN_RATE = 0
-GST_RATE = 0
-SEBI_RATE = 0
-STAMP_DUTY_BUY = 0
-SLIPPAGE_PER_UNIT = 0
+BROKERAGE_PER_ORDER = 20        # Rs. 20 flat per order (discount broker)
+STT_SELL_RATE = 0.000625        # 0.0625% on sell-side premium
+EXCHANGE_TXN_RATE = 0.00053     # NSE transaction charges
+GST_RATE = 0.18                 # 18% GST on brokerage + exchange charges
+SEBI_RATE = 0.000001            # Rs. 10 per crore
+STAMP_DUTY_BUY = 0.00003        # 0.003% on buy side
+SLIPPAGE_PER_UNIT = 0.50        # Rs. 0.50 estimated slippage per unit
 
 # === RISK-FREE RATE ===
 RISK_FREE_RATE = 0.07           # 7% annualized (Indian 10Y govt bond approx)

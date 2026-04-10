@@ -138,8 +138,14 @@ def compute_all_metrics(daily_pnl_series: pd.Series, capital: float = None,
     # Trade-level metrics if tradesheet provided
     if tradesheet is not None and len(tradesheet) > 0:
         metrics['Total_Trades'] = len(tradesheet)
-        trade_winners = (tradesheet['net_pnl'] > 0).sum() if 'net_pnl' in tradesheet.columns else 0
-        metrics['Trade_Win_Rate'] = round(trade_winners / len(tradesheet), 4) if len(tradesheet) > 0 else 0
+        winners = tradesheet[tradesheet['net_pnl'] > 0]
+        losers = tradesheet[tradesheet['net_pnl'] <= 0]
+        trade_winners_count = len(winners)
+        
+        metrics['Trade_Win_Rate'] = round(trade_winners_count / len(tradesheet), 4) if len(tradesheet) > 0 else 0
+        metrics['Avg_Trade_Profit'] = round(winners['net_pnl'].mean(), 2) if trade_winners_count > 0 else 0
+        metrics['Avg_Trade_Loss'] = round(losers['net_pnl'].mean(), 2) if len(losers) > 0 else 0
+        metrics['Avg_PnL_Per_Trade'] = round(tradesheet['net_pnl'].mean(), 2)
 
     return metrics
 

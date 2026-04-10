@@ -196,11 +196,11 @@ def generate_pdf_report(strategy_results: dict, portfolio_results: dict,
     story.append(Paragraph("2.3 Transaction Cost Model", heading2_style))
     txn_data = [
         ['Component', 'Rate'],
-        ['Brokerage', '0 (Zero transaction costs assumed)'],
-        ['STT', '0'],
-        ['Exchange charges', '0'],
-        ['GST', '0'],
-        ['Slippage', '0'],
+        ['Brokerage', 'Rs. 20/order (x2 for entry+exit)'],
+        ['STT', '0.0625% on sell-side premium'],
+        ['Exchange charges', '0.053% on both sides'],
+        ['GST', '18% on brokerage + exchange'],
+        ['Slippage', 'Rs. 0.50/unit on both sides'],
     ]
     txn_table = Table(txn_data, colWidths=[2*inch, 4*inch])
     txn_table.setStyle(TableStyle([
@@ -230,6 +230,35 @@ def generate_pdf_report(strategy_results: dict, portfolio_results: dict,
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
         ]))
         story.append(timing_table)
+    story.append(PageBreak())
+
+    # ============ PAGES 6-7: THOUGHT PROCESS ============
+    story.append(Paragraph("2.5 Strategy Working & Thought Process", heading2_style))
+    story.append(Paragraph(
+        "<b>Why these three strategies were selected:</b> "
+        "Intraday Nifty behavior is predominantly characterized by early-morning directional momentum (post-opening gaps) followed by strong midday mean-reversion. "
+        "By combining a purely directional momentum strategy, a pure theta-decay mean reversion strategy, and a semi-directional hybrid, we effectively hedge out regime-specific drawdowns.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>Mean Reversion (Short Straddle):</b> Triggered at 09:20 when early volatility settles. The parameter choice of a combined 1.5x Premium Stop-Loss ensures we survive sudden trending days while relying on theta decay for the 50% target. "
+        "<b>Directional (Breakout):</b> Looks specifically at the 09:15-09:45 window. If Nifty moves >0.5% in 30 minutes, it signifies high conviction institutional flow. We buy OTM options (150 points away) to limit capital at risk while targeting infinite upside via trailing SLs. "
+        "<b>Semi-Directional (Ratio Credit Spread):</b> We sell two OTM options while buying one inner hedge, allowing us to generate strong net credit while remaining theoretically protected against black-swan intraday reversals.",
+        body_style
+    ))
+    
+    story.append(Spacer(1, 0.3*inch))
+    story.append(Paragraph("2.6 Practical Tradability & CAGR Analysis", heading2_style))
+    story.append(Paragraph(
+        "A common observation is a very high Calmar ratio paired with a seemingly low absolute CAGR. This dynamic is purely a function of <b>Margin Utility and Leverage</b>. "
+        "In earlier iterations of this backtest, allocating an equal block of ₹33 Lakhs to each strategy but trading only 1 lot (requiring ~₹1.5L margin) resulted in 95% of the capital sitting idle. Furthermore, paying a flat ₹20 brokerage on a 1-lot trade aggressively erodes the edge. ",
+        body_style
+    ))
+    story.append(Paragraph(
+        "To make the system Practically Tradable and scale appropriately, we restructured position sizing to automatically deploy <b>20 lots (500 units)</b> per trade. "
+        "By allocating ~₹30L of the available ₹33L margin per strategy, the flat brokerage cost is diluted by 95%, and the absolute PnL scales directly with the true edge of the system, unlocking realistic institutional compounding.",
+        body_style
+    ))
     story.append(PageBreak())
 
     # ============ PAGES 6-15: INDIVIDUAL STRATEGY RESULTS ============
@@ -284,12 +313,14 @@ def generate_pdf_report(strategy_results: dict, portfolio_results: dict,
                          'Calmar_Ratio', 'Win_Rate', 'Profit_Factor', 'Payoff_Ratio',
                          'Max_Consecutive_Wins', 'Max_Consecutive_Losses',
                          'Recovery_Factor', 'Expectancy', 'Annual_Volatility',
-                         'Total_Net_PnL', 'Total_Trading_Days']:
+                         'Total_Net_PnL', 'Total_Trading_Days', 'Total_Trades',
+                         'Trade_Win_Rate', 'Avg_Trade_Profit', 'Avg_Trade_Loss',
+                         'Avg_PnL_Per_Trade']:
                 val = strat_metrics.get(key, 'N/A')
                 if isinstance(val, float):
-                    if key in ['CAGR', 'Max_Drawdown', 'Win_Rate', 'Annual_Volatility']:
+                    if key in ['CAGR', 'Max_Drawdown', 'Win_Rate', 'Annual_Volatility', 'Trade_Win_Rate']:
                         val = f"{val:.2%}"
-                    elif key in ['Total_Net_PnL', 'Expectancy']:
+                    elif key in ['Total_Net_PnL', 'Expectancy', 'Avg_Trade_Profit', 'Avg_Trade_Loss', 'Avg_PnL_Per_Trade']:
                         val = f"Rs.{val:,.0f}"
                     else:
                         val = f"{val:.4f}"
@@ -466,8 +497,8 @@ def generate_pdf_report(strategy_results: dict, portfolio_results: dict,
     story.append(Paragraph(
         "Mean reversion strategies (straddle) benefited from Nifty's tendency toward "
         "mean-reverting behavior on most trading days. The combined portfolio achieved diversification "
-        "benefits through uncorrelated strategy returns. The zero transaction cost environment "
-        "allowed strategies to realize their full theoretical gross edge.",
+        "benefits through uncorrelated strategy returns. Aggressive position sizing (20 lots) minimized "
+        "the percentage drag of flat rupee brokerage costs.",
         body_style
     ))
 

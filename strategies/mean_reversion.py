@@ -11,7 +11,7 @@ Strategy 1: Mean Reversion — Short Straddle with Combined SL
 
 import pandas as pd
 from strategies.base_strategy import BaseStrategy
-from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL
+from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL, MAX_LOTS
 
 
 class MeanReversionStrategy(BaseStrategy):
@@ -69,7 +69,7 @@ class MeanReversionStrategy(BaseStrategy):
                 'action': 'SELL',
                 'entry_time': self.entry_time,
                 'entry_price': ce_price,
-                'quantity': self.lot_size,
+                'quantity': self.lot_size * MAX_LOTS,
                 'sl_price': None,  # Combined SL handled in exit logic
                 'target_price': None,
                 'exit_time_limit': self.exit_time_limit,
@@ -82,7 +82,7 @@ class MeanReversionStrategy(BaseStrategy):
                 'action': 'SELL',
                 'entry_time': self.entry_time,
                 'entry_price': pe_price,
-                'quantity': self.lot_size,
+                'quantity': self.lot_size * MAX_LOTS,
                 'sl_price': None,
                 'target_price': None,
                 'exit_time_limit': self.exit_time_limit,

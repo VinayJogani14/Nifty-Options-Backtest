@@ -13,7 +13,7 @@ Strategy 3: Semi-Directional — Ratio Put/Call Credit Spread
 
 import pandas as pd
 from strategies.base_strategy import BaseStrategy
-from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL
+from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL, MAX_LOTS
 
 
 class SemiDirectionalStrategy(BaseStrategy):
@@ -105,7 +105,7 @@ class SemiDirectionalStrategy(BaseStrategy):
                 'action': 'SELL',
                 'entry_time': self.entry_time,
                 'entry_price': sell_price,
-                'quantity': self.lot_size * 2,  # 2 lots
+                'quantity': self.lot_size * 2 * MAX_LOTS,  # Ratio 2:1
                 'exit_time_limit': self.exit_time_limit,
                 'leg_group': leg_group,
             },
@@ -116,7 +116,7 @@ class SemiDirectionalStrategy(BaseStrategy):
                 'action': 'BUY',
                 'entry_time': self.entry_time,
                 'entry_price': buy_price,
-                'quantity': self.lot_size,  # 1 lot hedge
+                'quantity': self.lot_size * MAX_LOTS,  # 1 lot hedge
                 'exit_time_limit': self.exit_time_limit,
                 'leg_group': leg_group,
             }
