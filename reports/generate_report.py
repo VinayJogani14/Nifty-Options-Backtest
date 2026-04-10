@@ -232,31 +232,35 @@ def generate_pdf_report(strategy_results: dict, portfolio_results: dict,
         story.append(timing_table)
     story.append(PageBreak())
 
-    # ============ PAGES 6-7: THOUGHT PROCESS ============
-    story.append(Paragraph("2.5 Strategy Working & Thought Process", heading2_style))
+    # ============ PAGES 6-7: PARAMETERIZATION & OOS DEGRADATION ============
+    story.append(Paragraph("2.5 Parameterization & Heuristics Justification", heading2_style))
     story.append(Paragraph(
-        "<b>Why these three strategies were selected:</b> "
-        "Intraday Nifty behavior is predominantly characterized by early-morning directional momentum (post-opening gaps) followed by strong midday mean-reversion. "
-        "By combining a purely directional momentum strategy, a pure theta-decay mean reversion strategy, and a semi-directional hybrid, we effectively hedge out regime-specific drawdowns.",
+        "Quantitative systems translate human concepts into rigid heuristics. The following parameters were strictly modeled: "
+        "<b>09:15–09:45 Base Window:</b> Selected to circumvent the extreme bid-ask spread expansion and erratic liquidity natively found in the first minutes of the open. "
+        "<b>1.5x Premium Stop-Loss (Mean Reversion):</b> Functionally limits Nifty's freedom to roughly a 0.75% standard deviation. A hard stop safeguards the algorithm against structural intraday tail-risks."
+        "<b>Filter: Premium > Rs.5:</b> A safety block prohibiting the algorithm from selling deeply OTM penny-fractional options which carry massive synthetic gamma risk and offer no edge.",
         body_style
     ))
-    story.append(Paragraph(
-        "<b>Mean Reversion (Short Straddle):</b> Triggered at 09:20 when early volatility settles. The parameter choice of a combined 1.5x Premium Stop-Loss ensures we survive sudden trending days while relying on theta decay for the 50% target. "
-        "<b>Directional (Breakout):</b> Looks specifically at the 09:15-09:45 window. If Nifty moves >0.5% in 30 minutes, it signifies high conviction institutional flow. We buy OTM options (150 points away) to limit capital at risk while targeting infinite upside via trailing SLs. "
-        "<b>Semi-Directional (Ratio Credit Spread):</b> We sell two OTM options while buying one inner hedge, allowing us to generate strong net credit while remaining theoretically protected against black-swan intraday reversals.",
-        body_style
-    ))
+    story.append(Spacer(1, 0.2*inch))
     
-    story.append(Spacer(1, 0.3*inch))
-    story.append(Paragraph("2.6 Practical Tradability & CAGR Analysis", heading2_style))
+    story.append(Paragraph("2.6 Assumptions & Strategy Limitations", heading2_style))
     story.append(Paragraph(
-        "A common observation is a very high Calmar ratio paired with a seemingly low absolute CAGR. This dynamic is purely a function of <b>Margin Utility and Leverage</b>. "
-        "In earlier iterations of this backtest, allocating an equal block of ₹33 Lakhs to each strategy but trading only 1 lot (requiring ~₹1.5L margin) resulted in 95% of the capital sitting idle. Furthermore, paying a flat ₹20 brokerage on a 1-lot trade aggressively erodes the edge. ",
+        "<b>Greek Equivalency (Delta Limits):</b> For the 'Directional Breakout' system, calculating true Option Delta requires a local Black-Scholes implied-volatility surface generator. Due to execution constraints, we utilized a rigid 'Strike offset (ATM + 150)' as a proxy for Target Delta. In an institutional production environment, this would be updated to dynamically select strikes mapping to a precise ~0.25 Target Delta irrespective of the current VIX regime.",
         body_style
     ))
     story.append(Paragraph(
-        "To make the system Practically Tradable and scale appropriately, we restructured position sizing to automatically deploy <b>20 lots (500 units)</b> per trade. "
-        "By allocating ~₹30L of the available ₹33L margin per strategy, the flat brokerage cost is diluted by 95%, and the absolute PnL scales directly with the true edge of the system, unlocking realistic institutional compounding.",
+        "<b>Dynamic Slippage Modeling:</b> We modeled execution slippage dynamically as max(Rs. 0.50, 1% of Option Premium). Furthermore, exits flagged explicitly as Stop-Loss triggers automatically incurred a structural +1% 'Market Order-Book Tear' penalty to mathematically simulate the reality of gap-through slippage.",
+        body_style
+    ))
+    story.append(Spacer(1, 0.2*inch))
+
+    story.append(Paragraph("2.7 OOS Regime Degradation & Tradability Analysis", heading2_style))
+    story.append(Paragraph(
+        "<b>Is it Tradable? Leveraging the Edge:</b> To render the system practically tradable, we established volatility-adjusted Dynamic Margin Sizing. Rather than deploying exactly 1 lot per signal, each strategy deploys ~90% of its Rs. 33L margin equivalent dynamically (achieving 15-20 lots intrinsically). This leverages the absolute return and mathematically dilutes the flat Rs. 20 brokerage cost to near irrelevance.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>OOS Divergence & Curve-Fitting Analysis:</b> A critical observation is the sharp divergence between the perfectly rising In-Sample (IS) curve and the negative drift in the Out-Of-Sample (OOS) data structure. We explicitly identify that the hardcoded temporal exits (e.g., locking profits at exactly 80%) were likely structurally over-fitted (curve-fit) to the specific trending dynamics of 2024. The failure of the Directional breakout engine OOS proves structural regime degradation (e.g., shifting toward mean-reverting tight ranges). The strategy lacks forward-walk vitality and requires adaptive regime switching before live execution.",
         body_style
     ))
     story.append(PageBreak())

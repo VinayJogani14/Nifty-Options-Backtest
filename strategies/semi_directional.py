@@ -13,7 +13,7 @@ Strategy 3: Semi-Directional — Ratio Put/Call Credit Spread
 
 import pandas as pd
 from strategies.base_strategy import BaseStrategy
-from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL, MAX_LOTS
+from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL
 
 
 class SemiDirectionalStrategy(BaseStrategy):
@@ -43,6 +43,10 @@ class SemiDirectionalStrategy(BaseStrategy):
 
         if spot_open is None or spot_0925 is None:
             return []
+
+        # Dynamic Size calculation: 90% of Capital / 1,20,000 margin per ratio lot
+        margin_per_lot = 120000
+        num_lots = max(1, int((self.capital * 0.90) // margin_per_lot))
 
         # Determine bias
         overnight_gap = spot_0925 > prev_day_spot
@@ -105,7 +109,7 @@ class SemiDirectionalStrategy(BaseStrategy):
                 'action': 'SELL',
                 'entry_time': self.entry_time,
                 'entry_price': sell_price,
-                'quantity': self.lot_size * 2 * MAX_LOTS,  # Ratio 2:1
+                'quantity': self.lot_size * 2 * num_lots,  # Ratio 2:1
                 'exit_time_limit': self.exit_time_limit,
                 'leg_group': leg_group,
             },
@@ -116,7 +120,7 @@ class SemiDirectionalStrategy(BaseStrategy):
                 'action': 'BUY',
                 'entry_time': self.entry_time,
                 'entry_price': buy_price,
-                'quantity': self.lot_size * MAX_LOTS,  # 1 lot hedge
+                'quantity': self.lot_size * num_lots,  # 1 lot hedge
                 'exit_time_limit': self.exit_time_limit,
                 'leg_group': leg_group,
             }

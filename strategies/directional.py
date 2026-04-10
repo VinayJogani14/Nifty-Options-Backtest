@@ -14,7 +14,7 @@ Strategy 2: Directional — Momentum Breakout
 
 import pandas as pd
 from strategies.base_strategy import BaseStrategy
-from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL, MAX_LOTS
+from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL
 
 
 class DirectionalStrategy(BaseStrategy):
@@ -61,6 +61,11 @@ class DirectionalStrategy(BaseStrategy):
         if entry_price is None or entry_price < 2:
             return []
 
+        # Position Sizing: 5% risk max allocation
+        risk_capital = self.capital * 0.05
+        cost_per_lot = entry_price * self.lot_size
+        num_lots = max(1, int(risk_capital // cost_per_lot))
+
         # Get ticker
         rows = options_data[(options_data['strike'] == strike) &
                              (options_data['option_type'] == option_type)]
@@ -75,7 +80,7 @@ class DirectionalStrategy(BaseStrategy):
             'action': 'BUY',
             'entry_time': self.entry_time,
             'entry_price': entry_price,
-            'quantity': self.lot_size * MAX_LOTS,
+            'quantity': self.lot_size * num_lots,
             'sl_price': entry_price * (1 - self.sl_pct),
             'target_price': entry_price * (1 + self.target_pct),
             'exit_time_limit': self.exit_time_limit,

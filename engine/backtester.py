@@ -9,11 +9,11 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from config import (BROKERAGE_PER_ORDER, STT_SELL_RATE, EXCHANGE_TXN_RATE,
-                    GST_RATE, SLIPPAGE_PER_UNIT, NIFTY_LOT_SIZE, BASE_NAV,
+                    GST_RATE, SLIPPAGE_PCT, NIFTY_LOT_SIZE, BASE_NAV,
                     CAPITAL_PER_STRATEGY)
 
 
-def calculate_transaction_costs(entry_price, exit_price, quantity, action):
+def calculate_transaction_costs(entry_price, exit_price, quantity, action, exit_reason=None):
     """
     Calculate total transaction costs for a single leg trade.
 
@@ -22,6 +22,7 @@ def calculate_transaction_costs(entry_price, exit_price, quantity, action):
         exit_price: Price at exit
         quantity: Number of units traded (positive)
         action: 'BUY' or 'SELL' (the opening action)
+        exit_reason: Reason for exit (to apply SL penalty)
 
     Returns:
         Total transaction cost in rupees
@@ -44,8 +45,16 @@ def calculate_transaction_costs(entry_price, exit_price, quantity, action):
     # GST: 18% on (brokerage + exchange charges)
     gst = (brokerage + exchange) * GST_RATE
 
-    # Slippage: on both entry and exit
-    slippage = SLIPPAGE_PER_UNIT * quantity * 2
+    # Dynamic Slippage: max(0.50, 1% of premium) 
+    entry_slip = max(0.50, entry_price * SLIPPAGE_PCT) * quantity
+    exit_slip_rate = max(0.50, exit_price * SLIPPAGE_PCT)
+    
+    # Order-Book Tear Penalty: if exiting on SL, apply +1% extra penalty on exit
+    if exit_reason in ['SL', 'COMBINED_SL', 'TRAILING_SL']:
+        exit_slip_rate += (exit_price * 0.01)
+        
+    exit_slip = exit_slip_rate * quantity
+    slippage = entry_slip + exit_slip
 
     total_cost = brokerage + stt + exchange + gst + slippage
     return round(total_cost, 2)
@@ -277,7 +286,7 @@ def _compute_trade_pnl(tradesheet, capital):
             # Long: profit when price rises
             gpnl = (exit_p - entry_p) * qty
 
-        tc = calculate_transaction_costs(entry_p, exit_p, qty, action)
+        tc = calculate_transaction_costs(entry_p, exit_p, qty, action, row['exit_reason'])
         gross_pnl.append(round(gpnl, 2))
         txn_costs.append(tc)
 
