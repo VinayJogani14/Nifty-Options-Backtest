@@ -27,7 +27,7 @@ class DirectionalStrategy(BaseStrategy):
         self.exit_time_limit = "15:15"
         self.breakout_threshold = 0.005  # 0.5%
         self.otm_offset = 150  # 3 strikes OTM
-        self.sl_pct = 0.40  # 40% SL (exit when option at 60% of entry)
+        self.sl_pct = 0.20  # 20% SL (exit when option at 80% of entry)
         self.target_pct = 1.00  # 100% gain (option doubles)
         self.trailing_start_pct = 0.50  # Start trailing at 50% profit
         self.trailing_lock_pct = 0.50  # Lock 50% at 80%+ profit

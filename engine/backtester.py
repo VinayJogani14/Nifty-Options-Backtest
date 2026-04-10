@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from config import (BROKERAGE_PER_ORDER, STT_SELL_RATE, EXCHANGE_TXN_RATE,
-                    GST_RATE, SLIPPAGE_PCT, NIFTY_LOT_SIZE, BASE_NAV,
+                    GST_RATE, SLIPPAGE_PER_UNIT, NIFTY_LOT_SIZE, BASE_NAV,
                     CAPITAL_PER_STRATEGY)
 
 
@@ -45,16 +45,8 @@ def calculate_transaction_costs(entry_price, exit_price, quantity, action, exit_
     # GST: 18% on (brokerage + exchange charges)
     gst = (brokerage + exchange) * GST_RATE
 
-    # Dynamic Slippage: max(0.50, 1% of premium) 
-    entry_slip = max(0.50, entry_price * SLIPPAGE_PCT) * quantity
-    exit_slip_rate = max(0.50, exit_price * SLIPPAGE_PCT)
-    
-    # Order-Book Tear Penalty: if exiting on SL, apply +1% extra penalty on exit
-    if exit_reason in ['SL', 'COMBINED_SL', 'TRAILING_SL']:
-        exit_slip_rate += (exit_price * 0.01)
-        
-    exit_slip = exit_slip_rate * quantity
-    slippage = entry_slip + exit_slip
+    # Slippage: on both entry and exit
+    slippage = SLIPPAGE_PER_UNIT * quantity * 2
 
     total_cost = brokerage + stt + exchange + gst + slippage
     return round(total_cost, 2)

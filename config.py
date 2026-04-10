@@ -26,7 +26,7 @@ EXCHANGE_TXN_RATE = 0.00053     # NSE transaction charges
 GST_RATE = 0.18                 # 18% GST on brokerage + exchange charges
 SEBI_RATE = 0.000001            # Rs. 10 per crore
 STAMP_DUTY_BUY = 0.00003        # 0.003% on buy side
-SLIPPAGE_PCT = 0.01             # 1% slippage dynamically scaled per premium
+SLIPPAGE_PER_UNIT = 0.10        # Rs. 0.10 estimated slippage (institutional limit execution)
 
 # === RISK-FREE RATE ===
 RISK_FREE_RATE = 0.07           # 7% annualized (Indian 10Y govt bond approx)

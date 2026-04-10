@@ -15,16 +15,20 @@ from config import NIFTY_LOT_SIZE, STRIKE_INTERVAL
 
 
 class MeanReversionStrategy(BaseStrategy):
+    """
+    Mean Reversion Strategy:
+    Sells ATM Straddle at 09:30 and holds until 15:15 or combined SL.
+    """
 
     def __init__(self, capital, lot_size=NIFTY_LOT_SIZE):
         super().__init__("MeanReversion", capital, lot_size)
-        self.entry_time = "09:20"
+        self.entry_time = "09:30"
         self.exit_time_limit = "15:15"
         self.sl_multiplier = 1.5  # Combined SL: 1.5x entry premiums
         self.target_multiplier = 0.5  # Target: 50% of entry premiums
 
     def generate_signals(self, date, spot_data, options_data, prev_day_spot=None):
-        """Generate short straddle signals at 09:20 on non-expiry days."""
+        """Generate short straddle signals at 09:30 on non-expiry days."""
         # Skip expiry day
         if self.is_expiry_day(date):
             return []
